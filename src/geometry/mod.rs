@@ -58,6 +58,26 @@ where
         }
         (dim, max)
     }
+
+    fn face_towards_same_hemisphere(&self, other: &Self) -> Self {
+        if self.dot(other) < T::default() {
+            -*self
+        } else {
+            *self
+        }
+    }
+
+    fn square_distance_to(&self, other: &Self) -> T {
+        (*other - *self).mag2()
+    }
+
+    fn abs(&self) -> Self {
+        let mut new_data = [T::default(); N];
+        for i in 0..N {
+            new_data[i] = self.data[i].m_abs();
+        }
+        Self { data: new_data }
+    }
 }
 
 impl<T, const N: usize> Vector<T, N>
@@ -78,6 +98,30 @@ where
 
     fn normalized(&self) -> Self {
         *self / self.mag()
+    }
+
+    fn distance_to(&self, other: &Self) -> T {
+        (*other - *self).mag()
+    }
+
+    fn lerp(&self, t: T, other: &Self) -> Self {
+        *self - *self * t + *other * t
+    }
+
+    fn floor(&self) -> Self {
+        let mut new_data = [T::default(); N];
+        for i in 0..N {
+            new_data[i] = self.data[i].m_floor();
+        }
+        Self { data: new_data }
+    }
+
+    fn ceil(&self) -> Self {
+        let mut new_data = [T::default(); N];
+        for i in 0..N {
+            new_data[i] = self.data[i].m_ceil();
+        }
+        Self { data: new_data }
     }
 }
 
@@ -477,5 +521,54 @@ mod test {
         assert_eq!(x.dot(&y), 0.0);
         assert_eq!(x.dot(&z), 0.0);
         assert_eq!(z.dot(&y), 0.0);
+    }
+
+    #[test]
+    fn test_faceforward() {
+        let normal = Vec3::<f32>::elements(0.0, 0.0, 1.0);
+        assert_eq!(
+            normal.face_towards_same_hemisphere(&(0.0, 0.5, -0.5).into()),
+            (0.0, 0.0, -1.0).into()
+        );
+        assert_eq!(
+            normal.face_towards_same_hemisphere(&(0.0, 0.5, 0.5).into()),
+            (0.0, 0.0, 1.0).into()
+        );
+    }
+
+    #[test]
+    fn test_abs_floor_ceil() {
+        assert_eq!(
+            Vec3::<f32>::elements(-1.0, -2.0, -3.0).abs(),
+            (1.0, 2.0, 3.0).into()
+        );
+        assert_eq!(
+            Vec3::<f32>::elements(1.5, 2.5, 3.5).floor(),
+            (1.0, 2.0, 3.0).into()
+        );
+        assert_eq!(
+            Vec3::<f32>::elements(1.5, 2.5, 3.5).ceil(),
+            (2.0, 3.0, 4.0).into()
+        );
+    }
+
+    #[test]
+    fn test_distance() {
+        assert_eq!(
+            Vec3::<f32>::elements(1.0, 0.0, 0.0).distance_to(&(2.0, 0.0, 0.0).into()),
+            1.0
+        );
+        assert_eq!(
+            Vec3::<f32>::elements(1.0, 0.0, 0.0).square_distance_to(&(5.0, 0.0, 0.0).into()),
+            16.0
+        );
+    }
+
+    #[test]
+    fn test_lerp() {
+        assert_eq!(
+            Vec3::<f32>::elements(1.0, 0.0, 0.0).lerp(0.5, &(2.0, 0.0, 0.0).into()),
+            (1.5, 0.0, 0.0).into()
+        );
     }
 }
