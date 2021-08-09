@@ -289,6 +289,18 @@ where
     fn sin_theta(&self, other: &Self) -> T {
         self.cross(other).mag() / self.mag() / other.mag()
     }
+
+    fn spanning_set(&self) -> (Self, Self, Self) {
+        let first = self.normalized();
+        let second = if first.x().m_abs() > first.y().m_abs() {
+            Vec3::<T>::elements(-first.z(), T::default(), first.x())
+                / Vec2::<T>::elements(first.x(), first.z()).mag()
+        } else {
+            Vec3::<T>::elements(T::default(), first.z(), -first.y())
+                / Vec2::<T>::elements(first.y(), first.z()).mag()
+        };
+        (first, second, first.cross(&second))
+    }
 }
 
 pub type Vec4<T> = Vector<T, 4>;
@@ -457,5 +469,13 @@ mod test {
                 .to_degrees(),
             90.0
         );
+    }
+
+    #[test]
+    fn test_span() {
+        let (x, y, z) = Vec3::<f32>::elements(1.0, 2.0, 3.0).spanning_set();
+        assert_eq!(x.dot(&y), 0.0);
+        assert_eq!(x.dot(&z), 0.0);
+        assert_eq!(z.dot(&y), 0.0);
     }
 }
