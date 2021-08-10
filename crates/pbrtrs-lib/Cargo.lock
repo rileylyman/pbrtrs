@@ -3,12 +3,5 @@
 version = 3
 
 [[package]]
-name = "pbrtrs"
-version = "0.1.0"
-dependencies = [
- "pbrtrs-lib",
-]
-
-[[package]]
 name = "pbrtrs-lib"
 version = "0.1.0"
