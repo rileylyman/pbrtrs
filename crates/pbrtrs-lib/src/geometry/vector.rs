@@ -17,6 +17,22 @@ where
         Self { data: [v; N] }
     }
 
+    pub fn from_min_components(a: &Self, b: &Self) -> Self {
+        let mut new_data = [T::default(); N];
+        for i in 0..N {
+            new_data[i] = a.data[i].m_min(b.data[i]);
+        }
+        Self { data: new_data }
+    }
+
+    pub fn from_max_components(a: &Self, b: &Self) -> Self {
+        let mut new_data = [T::default(); N];
+        for i in 0..N {
+            new_data[i] = a.data[i].m_max(b.data[i]);
+        }
+        Self { data: new_data }
+    }
+
     pub fn dot(&self, other: &Self) -> T {
         let mut accum = T::default();
         for i in 0..N {
